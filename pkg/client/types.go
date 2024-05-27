@@ -88,7 +88,7 @@ type Book struct {
 	Version             int64     `json:"_version_"`
 }
 
-func (*Book) CSVHeader(w io.Writer) {
+func CSVHeader(w io.Writer) {
 	cw := csv.NewWriter(w)
 	cw.Write([]string{
 		"product_id",

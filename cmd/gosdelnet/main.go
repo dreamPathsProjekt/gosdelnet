@@ -82,7 +82,7 @@ func main() {
 		defer file.Close()
 
 		books := result.Response.Docs
-		books[0].CSVHeader(file)
+		gosdel.CSVHeader(file)
 
 		for _, book := range books {
 			book.CSVRow(file)
