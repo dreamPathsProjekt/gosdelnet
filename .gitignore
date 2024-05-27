@@ -19,3 +19,17 @@
 
 # Go workspace file
 go.work
+
+## Custom Ignore
+.idea
+.vscode
+*.env
+certs/
+.DS_Store
+docker-compose.local.yml
+scratch/
+*.pem
+*.key
+
+# Devcontainer mount
+_cache

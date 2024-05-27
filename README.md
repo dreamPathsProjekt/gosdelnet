@@ -1,2 +1,3 @@
-# gosdelnet
-Golang osdelnet.gr book library client
+# Gosdelnet
+
+Golang [osdelnet](https://osdelnet.gr/) Greek Book Library Client.
