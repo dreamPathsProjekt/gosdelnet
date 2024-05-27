@@ -111,7 +111,8 @@ func main() {
 		log.Info().Msg("No ISBN-13 specified, searching all books")
 	}
 
-	if *publisher != "" {
+	// TODO: Document tricky example with publisher field: "-publisher οδος" produces results for imprint name: "Δίοδος" whereas we initially wanted imprint name: "Οδός Πανός"
+	if *publisher != "" && *isbn == "" {
 		log.Info().Str("publisher", *publisher).Msgf("Searching for publisher: %s", *publisher)
 		query = fmt.Sprintf("imprint_search:(%s)", *publisher)
 	} else {
