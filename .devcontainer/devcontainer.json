@@ -1,0 +1,26 @@
+{
+    "name": "gosdelnet",
+    "image": "golang:1.22.3-bullseye",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "shardulm94.trailing-spaces",
+                "golang.go",
+                "github.vscode-pull-request-github"
+            ],
+            "settings": {
+                "editor.tabSize": 4,
+                "editor.insertSpaces": true,
+                "editor.detectIndentation": false
+            }
+        }
+    },
+    // https://github.com/testcontainers/testcontainers-go/pull/1298
+    "privileged": true,
+    // https://tkacz.pro/docker-volumes-cached-vs-delegated/
+    "mounts": [
+        "source=${localWorkspaceFolder}/.devcontainer/_cache,target=/go,type=bind,consistency=cached",
+        "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+    ]
+    // https://code.visualstudio.com/docs/devcontainers/tips-and-tricks
+}
