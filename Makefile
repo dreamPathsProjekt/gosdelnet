@@ -57,7 +57,7 @@ test_docker: ensure_devcontainer
 		-w /app \
 		--privileged \
 		--network host \
-		golang:1.21.8-bullseye \
+		golang:1.22.3-bullseye \
 		/bin/bash -c 'git config --global --add safe.directory /app && go get ./... && go test -v ./...'
 
 
