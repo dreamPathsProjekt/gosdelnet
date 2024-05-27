@@ -30,6 +30,7 @@ docker-compose.local.yml
 scratch/
 *.pem
 *.key
+*.csv
 
 # Devcontainer mount
 _cache

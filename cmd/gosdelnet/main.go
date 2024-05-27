@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/csv"
 	"flag"
 	"fmt"
 	"os"
@@ -19,7 +20,10 @@ const (
 
 func main() {
 	var (
-		query string = "*:*"
+		isbns  []string
+		books  []gosdel.Book
+		query  string = "*:*"
+		result *gosdel.Response
 	)
 
 	time.Local = time.UTC
@@ -39,6 +43,63 @@ func main() {
 
 	if *file != "" {
 		log.Info().Str("file", *file).Msgf("Reading from CSV file: %s", *file)
+		inFile, err := os.Open(*file)
+		if err != nil {
+			panic(err)
+		}
+		defer inFile.Close()
+
+		reader := csv.NewReader(inFile)
+		inputData, err := reader.ReadAll()
+		if err != nil {
+			panic(err)
+		}
+
+		// Print the CSV data
+		for i, row := range inputData {
+			for _, col := range row {
+				// Disregard the header row.
+				if i == 0 {
+					continue
+				}
+
+				isbns = append(isbns, col)
+			}
+		}
+
+		if len(isbns) > 0 {
+			for _, isbn13 := range isbns {
+				log.Info().Str("isbn", *isbn).Msgf("Searching for ISBN-13: %s", isbn13)
+				q := fmt.Sprintf("isbn13_search:(%s)", isbn13)
+				r := int64(1)
+
+				client, err := gosdel.New(gosdel.Opts{
+					URL:      baseUrl,
+					User:     user,
+					Password: password,
+					Rows:     &r,
+					Query:    &q,
+				})
+				if err != nil {
+					log.Fatal().Err(err).Msg("Failed to create client")
+				}
+
+				result, err := client.Do(context.TODO(), *verbose)
+				if err != nil {
+					log.Fatal().Err(err).Send()
+				}
+
+				books = append(books, result.Response.Docs...)
+			}
+		}
+
+		log.Info().
+			Interface("books", books).
+			Msg("Finished parsing all book results")
+
+		if csvFile == nil {
+			return
+		}
 	} else {
 		log.Info().Msg("No file specified, parsing all book results")
 	}
@@ -57,35 +118,40 @@ func main() {
 		log.Info().Msg("No publisher specified, searching all publishers")
 	}
 
-	client, err := gosdel.New(gosdel.Opts{
-		URL:      baseUrl,
-		User:     user,
-		Password: password,
-		Rows:     rows,
-		Query:    &query,
-	})
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create client")
-	}
+	if *file == "" {
+		client, err := gosdel.New(gosdel.Opts{
+			URL:      baseUrl,
+			User:     user,
+			Password: password,
+			Rows:     rows,
+			Query:    &query,
+		})
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to create client")
+		}
 
-	result, err := client.Do(context.TODO(), *verbose)
-	if err != nil {
-		log.Fatal().Err(err).Send()
+		result, err = client.Do(context.TODO(), *verbose)
+		if err != nil {
+			log.Fatal().Err(err).Send()
+		}
 	}
 
 	if *csvFile != "" {
 		log.Info().Str("csv", *csvFile).Msgf("Writing to CSV file: %s", *csvFile)
-		file, err := os.Create(*csvFile)
+		outFile, err := os.Create(*csvFile)
 		if err != nil {
 			panic(err)
 		}
-		defer file.Close()
+		defer outFile.Close()
 
-		books := result.Response.Docs
-		gosdel.CSVHeader(file)
+		gosdel.CSVHeader(outFile)
+
+		if *file == "" {
+			books = result.Response.Docs
+		}
 
 		for _, book := range books {
-			book.CSVRow(file)
+			book.CSVRow(outFile)
 		}
 	}
 }
