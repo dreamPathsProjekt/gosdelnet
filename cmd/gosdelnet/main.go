@@ -101,7 +101,7 @@ func main() {
 			return
 		}
 	} else {
-		log.Info().Msg("No file specified, parsing all book results")
+		log.Info().Msg("No input file specified, searching all results")
 	}
 
 	if *isbn != "" {
