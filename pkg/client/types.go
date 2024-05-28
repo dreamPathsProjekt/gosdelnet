@@ -81,111 +81,172 @@ type Book struct {
 	ContrDenoms         []string  `json:"contr_denoms"`
 	LastPriceUpdate     time.Time `json:"last_price_update"`
 	Price               float64   `json:"price"`
+	PriceChange         float64   `json:"price_change"`
 	Vat                 float64   `json:"vat"`
+	VatChange           float64   `json:"vat_change"`
 	PriceType           string    `json:"price_type"`
 	PriceValidUntil     time.Time `json:"price_valid_until"`
 	Cover               string    `json:"cover"`
 	Version             int64     `json:"_version_"`
 }
 
-func CSVHeader(w io.Writer) {
+type CompactBook struct {
+	ProductID        string    `json:"product_id"`
+	PublishingStatus string    `json:"publishing_status"`
+	PubID            string    `json:"pub_id"`
+	PubName          string    `json:"pub_name"`
+	Isbn13           string    `json:"isbn13"`
+	DistinctiveTitle string    `json:"distinctive_title"`
+	LastUpdate       time.Time `json:"last_update"`
+	LastPriceUpdate  time.Time `json:"last_price_update"`
+	PriceValidUntil  time.Time `json:"price_valid_until"`
+	Price            float64   `json:"price"`
+	PriceChange      float64   `json:"price_change"`
+	Vat              float64   `json:"vat"`
+	VatChange        float64   `json:"vat_change"`
+	PriceType        string    `json:"price_type"`
+}
+
+func CSVHeader(w io.Writer, compact bool) {
 	cw := csv.NewWriter(w)
-	cw.Write([]string{
-		"product_id",
-		"translated",
-		"publishing_status",
-		"last_update",
-		"product_status",
-		"lcx",
-		"add_product_ts",
-		"product_form_id",
-		"product_form",
-		"product_kind",
-		"pub_id",
-		"pub_name",
-		"imprint",
-		"pages",
-		"distinctive_title",
-		"distinctive_subtitle",
-		"thema_code",
-		"classification",
-		"category",
-		"audience",
-		"language",
-		"edition_no",
-		"city",
-		"pub_month",
-		"pub_year",
-		"pub_day",
-		"license_no",
-		"lcno",
-		"gtin13",
-		"prefix",
-		"isbn13",
-		"contr_id",
-		"contr_name",
-		"contr_id_role",
-		"contr_id_tab",
-		"contr_role",
-		"contr_denoms",
-		"last_price_update",
-		"price",
-		"vat",
-		"price_type",
-		"price_valid_until",
-		"cover",
-		"version",
-	})
+	if compact {
+		cw.Write([]string{
+			"product_id",
+			"publishing_status",
+			"pub_id",
+			"pub_name",
+			"isbn13",
+			"distinctive_title",
+			"last_update",
+			"last_price_update",
+			"price_valid_until",
+			"price",
+			"price_change",
+			"vat",
+			"vat_change",
+			"price_type",
+		})
+	} else {
+		cw.Write([]string{
+			"product_id",
+			"translated",
+			"publishing_status",
+			"last_update",
+			"product_status",
+			"lcx",
+			"add_product_ts",
+			"product_form_id",
+			"product_form",
+			"product_kind",
+			"pub_id",
+			"pub_name",
+			"imprint",
+			"pages",
+			"distinctive_title",
+			"distinctive_subtitle",
+			"thema_code",
+			"classification",
+			"category",
+			"audience",
+			"language",
+			"edition_no",
+			"city",
+			"pub_month",
+			"pub_year",
+			"pub_day",
+			"license_no",
+			"lcno",
+			"gtin13",
+			"prefix",
+			"isbn13",
+			"contr_id",
+			"contr_name",
+			"contr_id_role",
+			"contr_id_tab",
+			"contr_role",
+			"contr_denoms",
+			"last_price_update",
+			"price",
+			"price_change",
+			"vat",
+			"vat_change",
+			"price_type",
+			"price_valid_until",
+			"cover",
+			"version",
+		})
+	}
 	cw.Flush()
 }
 
-func (b *Book) CSVRow(w io.Writer) {
+func (b *Book) CSVRow(w io.Writer, compact bool) {
 	cw := csv.NewWriter(w)
-	cw.Write([]string{
-		b.ProductID,
-		b.Translated,
-		b.PublishingStatus,
-		b.LastUpdate.Format(time.RFC1123),
-		strconv.FormatBool(b.ProductStatus),
-		strconv.FormatBool(b.Lcx),
-		b.AddProductTs.Format(time.RFC1123),
-		b.ProductFormID,
-		b.ProductForm,
-		b.ProductKind,
-		b.PubID,
-		b.PubName,
-		b.Imprint,
-		strconv.FormatInt(b.Pages, 10),
-		b.DistinctiveTitle,
-		b.DistinctiveSubtitle,
-		strings.Join(b.ThemaCode, " "),
-		strings.Join(b.Classification, " "),
-		strings.Join(b.Category, " "),
-		strings.Join(b.Audience, " "),
-		strings.Join(b.Language, " "),
-		strconv.FormatInt(b.EditionNo, 10),
-		b.City,
-		strconv.FormatInt(int64(b.PubMonth), 10),
-		strconv.FormatInt(int64(b.PubYear), 10),
-		strconv.FormatInt(int64(b.PubDay), 10),
-		strconv.FormatInt(b.LicenseNo, 10),
-		strconv.FormatInt(b.Lcno, 10),
-		b.GTin13,
-		b.Prefix,
-		b.Isbn13,
-		strings.Join(b.ContrID, " "),
-		strings.Join(b.ContrName, " "),
-		strings.Join(b.ContrIDRole, " "),
-		strings.Join(b.ContrIDTab, " "),
-		strings.Join(b.ContrRole, " "),
-		strings.Join(b.ContrDenoms, " "),
-		b.LastPriceUpdate.Format(time.RFC1123),
-		strconv.FormatFloat(b.Price, 'f', 2, 64),
-		strconv.FormatFloat(b.Vat, 'f', 2, 64),
-		b.PriceType,
-		b.PriceValidUntil.Format(time.RFC1123),
-		b.Cover,
-		strconv.FormatInt(b.Version, 10),
-	})
+	if compact {
+		cw.Write([]string{
+			b.ProductID,
+			b.PublishingStatus,
+			b.PubID,
+			b.PubName,
+			b.Isbn13,
+			b.DistinctiveTitle,
+			b.LastUpdate.Format(time.RFC1123),
+			b.LastPriceUpdate.Format(time.RFC1123),
+			b.PriceValidUntil.Format(time.RFC1123),
+			strconv.FormatFloat(b.Price, 'f', 2, 64),
+			strconv.FormatFloat(b.PriceChange, 'f', 2, 64),
+			strconv.FormatFloat(b.Vat, 'f', 2, 64),
+			strconv.FormatFloat(b.VatChange, 'f', 2, 64),
+			b.PriceType,
+		})
+	} else {
+		cw.Write([]string{
+			b.ProductID,
+			b.Translated,
+			b.PublishingStatus,
+			b.LastUpdate.Format(time.RFC1123),
+			strconv.FormatBool(b.ProductStatus),
+			strconv.FormatBool(b.Lcx),
+			b.AddProductTs.Format(time.RFC1123),
+			b.ProductFormID,
+			b.ProductForm,
+			b.ProductKind,
+			b.PubID,
+			b.PubName,
+			b.Imprint,
+			strconv.FormatInt(b.Pages, 10),
+			b.DistinctiveTitle,
+			b.DistinctiveSubtitle,
+			strings.Join(b.ThemaCode, " "),
+			strings.Join(b.Classification, " "),
+			strings.Join(b.Category, " "),
+			strings.Join(b.Audience, " "),
+			strings.Join(b.Language, " "),
+			strconv.FormatInt(b.EditionNo, 10),
+			b.City,
+			strconv.FormatInt(int64(b.PubMonth), 10),
+			strconv.FormatInt(int64(b.PubYear), 10),
+			strconv.FormatInt(int64(b.PubDay), 10),
+			strconv.FormatInt(b.LicenseNo, 10),
+			strconv.FormatInt(b.Lcno, 10),
+			b.GTin13,
+			b.Prefix,
+			b.Isbn13,
+			strings.Join(b.ContrID, " "),
+			strings.Join(b.ContrName, " "),
+			strings.Join(b.ContrIDRole, " "),
+			strings.Join(b.ContrIDTab, " "),
+			strings.Join(b.ContrRole, " "),
+			strings.Join(b.ContrDenoms, " "),
+			b.LastPriceUpdate.Format(time.RFC1123),
+			strconv.FormatFloat(b.Price, 'f', 2, 64),
+			strconv.FormatFloat(b.PriceChange, 'f', 2, 64),
+			strconv.FormatFloat(b.Vat, 'f', 2, 64),
+			strconv.FormatFloat(b.VatChange, 'f', 2, 64),
+			b.PriceType,
+			b.PriceValidUntil.Format(time.RFC1123),
+			b.Cover,
+			strconv.FormatInt(b.Version, 10),
+		})
+	}
 	cw.Flush()
 }

@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	gosdel "github.com/dreamPathsProjekt/gosdelnet/pkg/client"
@@ -37,6 +38,7 @@ func main() {
 	isbn := flag.String("isbn", "", "specify an ISBN-13 to search for, can use prefix too (e.g. 978-960-451-482 instead of full ISBN-13 978-960-451-482-3)")
 	publisher := flag.String("publisher", "", "specify a publisher to search for")
 	csvFile := flag.String("csv", "", "specify an output csv file to write to")
+	price := flag.Bool("price", false, "enable price tracking outputs")
 	verbose := flag.Bool("verbose", false, "enable verbose logging")
 
 	flag.Parse()
@@ -57,13 +59,25 @@ func main() {
 
 		// Print the CSV data
 		for i, row := range inputData {
-			for _, col := range row {
-				// Disregard the header row.
-				if i == 0 {
+			if i == 0 {
+				continue
+			}
+
+			isbn, priceTracking := row[0], row[1]
+			track, err := strconv.ParseBool(priceTracking)
+			if err != nil {
+				log.Error().Err(err).Msgf("Failed to parse price tracking value as boolean: %s", priceTracking)
+				continue
+			}
+
+			if *price {
+				if track {
+					isbns = append(isbns, isbn)
+				} else {
 					continue
 				}
-
-				isbns = append(isbns, col)
+			} else {
+				isbns = append(isbns, isbn)
 			}
 		}
 
@@ -145,14 +159,14 @@ func main() {
 		}
 		defer outFile.Close()
 
-		gosdel.CSVHeader(outFile)
+		gosdel.CSVHeader(outFile, *price)
 
 		if *file == "" {
 			books = result.Response.Docs
 		}
 
 		for _, book := range books {
-			book.CSVRow(outFile)
+			book.CSVRow(outFile, *price)
 		}
 	}
 }
