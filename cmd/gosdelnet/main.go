@@ -2,14 +2,13 @@ package main
 
 import (
 	"context"
-	"encoding/csv"
 	"flag"
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 
-	gosdel "github.com/dreamPathsProjekt/gosdelnet/pkg/client"
+	"github.com/dreamPathsProjekt/gosdelnet/pkg/batch"
+	"github.com/dreamPathsProjekt/gosdelnet/pkg/client"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -20,12 +19,7 @@ const (
 )
 
 func main() {
-	var (
-		isbns  []string
-		books  []gosdel.Book
-		query  string = "*:*"
-		result *gosdel.Response
-	)
+	var query string = "*:*"
 
 	time.Local = time.UTC
 	zerolog.TimeFieldFormat = timeFmt
@@ -45,78 +39,32 @@ func main() {
 
 	if *file != "" {
 		log.Info().Str("file", *file).Msgf("Reading from CSV file: %s", *file)
-		inFile, err := os.Open(*file)
+
+		books, err := batch.SearchByISBNFromCSV(*file, *price, &client.Opts{
+			URL:      baseUrl,
+			User:     user,
+			Password: password,
+		}, *verbose)
 		if err != nil {
-			panic(err)
-		}
-		defer inFile.Close()
-
-		reader := csv.NewReader(inFile)
-		inputData, err := reader.ReadAll()
-		if err != nil {
-			panic(err)
-		}
-
-		// Print the CSV data
-		for i, row := range inputData {
-			if i == 0 {
-				continue
-			}
-
-			isbn, priceTracking := row[0], row[1]
-			track, err := strconv.ParseBool(priceTracking)
-			if err != nil {
-				log.Error().Err(err).Msgf("Failed to parse price tracking value as boolean: %s", priceTracking)
-				continue
-			}
-
-			if *price {
-				if track {
-					isbns = append(isbns, isbn)
-				} else {
-					continue
-				}
-			} else {
-				isbns = append(isbns, isbn)
-			}
-		}
-
-		if len(isbns) > 0 {
-			for _, isbn13 := range isbns {
-				log.Info().Str("isbn", *isbn).Msgf("Searching for ISBN-13: %s", isbn13)
-				q := fmt.Sprintf("isbn13_search:(%s)", isbn13)
-				r := int64(1)
-
-				client, err := gosdel.New(gosdel.Opts{
-					URL:      baseUrl,
-					User:     user,
-					Password: password,
-					Rows:     &r,
-					Query:    &q,
-				})
-				if err != nil {
-					log.Fatal().Err(err).Msg("Failed to create client")
-				}
-
-				result, err := client.Do(context.TODO(), *verbose)
-				if err != nil {
-					log.Fatal().Err(err).Send()
-				}
-
-				books = append(books, result.Response.Docs...)
-			}
+			log.Fatal().Err(err).Msg("Failed to read CSV file")
 		}
 
 		log.Info().
 			Interface("books", books).
 			Msg("Finished parsing all book results")
 
-		if csvFile == nil {
-			return
+		if *csvFile != "" {
+			log.Info().Str("csv", *csvFile).Msgf("Writing to CSV file: %s", *csvFile)
+			err := batch.WriteResultsToCSV(*csvFile, books, *price)
+			if err != nil {
+				log.Fatal().Err(err).Msg("Failed to write to CSV file")
+			}
 		}
-	} else {
-		log.Info().Msg("No input file specified, searching all results")
+
+		return
 	}
+
+	log.Info().Msg("No input file specified, searching all results")
 
 	if *isbn != "" {
 		log.Info().Str("isbn", *isbn).Msgf("Searching for ISBN-13: %s", *isbn)
@@ -133,40 +81,27 @@ func main() {
 		log.Info().Msg("No publisher specified, searching all publishers")
 	}
 
-	if *file == "" {
-		client, err := gosdel.New(gosdel.Opts{
-			URL:      baseUrl,
-			User:     user,
-			Password: password,
-			Rows:     rows,
-			Query:    &query,
-		})
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to create client")
-		}
+	client, err := client.New(client.Opts{
+		URL:      baseUrl,
+		User:     user,
+		Password: password,
+		Rows:     rows,
+		Query:    &query,
+	})
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create client")
+	}
 
-		result, err = client.Do(context.TODO(), *verbose)
-		if err != nil {
-			log.Fatal().Err(err).Send()
-		}
+	result, err := client.Do(context.TODO(), *verbose)
+	if err != nil {
+		log.Fatal().Err(err).Send()
 	}
 
 	if *csvFile != "" {
 		log.Info().Str("csv", *csvFile).Msgf("Writing to CSV file: %s", *csvFile)
-		outFile, err := os.Create(*csvFile)
+		err := batch.WriteResultsToCSV(*csvFile, result.Response.Docs, *price)
 		if err != nil {
-			panic(err)
-		}
-		defer outFile.Close()
-
-		gosdel.CSVHeader(outFile, *price)
-
-		if *file == "" {
-			books = result.Response.Docs
-		}
-
-		for _, book := range books {
-			book.CSVRow(outFile, *price)
+			log.Fatal().Err(err).Msg("Failed to write to CSV file")
 		}
 	}
 }
