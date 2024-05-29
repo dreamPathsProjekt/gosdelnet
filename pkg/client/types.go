@@ -58,6 +58,7 @@ type Book struct {
 	Pages               int64     `json:"pages"`
 	DistinctiveTitle    string    `json:"distinctive_title"`
 	DistinctiveSubtitle string    `json:"distinctive_subtitle"`
+	Description         string    `json:"description"`
 	ThemaCode           []string  `json:"thema_code"`
 	Classification      []string  `json:"classification"`
 	Category            []string  `json:"category"`
@@ -87,6 +88,7 @@ type Book struct {
 	PriceType           string    `json:"price_type"`
 	PriceValidUntil     time.Time `json:"price_valid_until"`
 	Cover               string    `json:"cover"`
+	CoverBack           string    `json:"cover_back"`
 	Version             int64     `json:"_version_"`
 }
 
@@ -144,6 +146,7 @@ func CSVHeader(w io.Writer, compact bool) {
 			"pages",
 			"distinctive_title",
 			"distinctive_subtitle",
+			"description",
 			"thema_code",
 			"classification",
 			"category",
@@ -173,6 +176,7 @@ func CSVHeader(w io.Writer, compact bool) {
 			"price_type",
 			"price_valid_until",
 			"cover",
+			"cover_back",
 			"version",
 		})
 	}
@@ -216,6 +220,7 @@ func (b *Book) CSVRow(w io.Writer, compact bool) {
 			strconv.FormatInt(b.Pages, 10),
 			b.DistinctiveTitle,
 			b.DistinctiveSubtitle,
+			b.Description,
 			strings.Join(b.ThemaCode, " "),
 			strings.Join(b.Classification, " "),
 			strings.Join(b.Category, " "),
@@ -245,6 +250,7 @@ func (b *Book) CSVRow(w io.Writer, compact bool) {
 			b.PriceType,
 			b.PriceValidUntil.Format(time.RFC1123),
 			b.Cover,
+			b.CoverBack,
 			strconv.FormatInt(b.Version, 10),
 		})
 	}
