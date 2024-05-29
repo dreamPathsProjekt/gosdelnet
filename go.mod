@@ -5,6 +5,7 @@ go 1.22.2
 require (
 	github.com/go-resty/resty/v2 v2.13.1
 	github.com/rs/zerolog v1.33.0
+	github.com/shopspring/decimal v1.4.0
 )
 
 require (

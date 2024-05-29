@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 const (
@@ -42,71 +44,71 @@ type Data struct {
 }
 
 type Book struct {
-	ProductID           string    `json:"product_id"`
-	Translated          string    `json:"translated"`
-	PublishingStatus    string    `json:"publishing_status"`
-	LastUpdate          time.Time `json:"last_update"`
-	ProductStatus       bool      `json:"product_status"`
-	Lcx                 bool      `json:"lcx"`
-	AddProductTs        time.Time `json:"add_product_ts"`
-	ProductFormID       string    `json:"product_form_id"`
-	ProductForm         string    `json:"product_form"`
-	ProductKind         string    `json:"product_kind"`
-	PubID               string    `json:"pub_id"`
-	PubName             string    `json:"pub_name"`
-	Imprint             string    `json:"imprint"`
-	Pages               int64     `json:"pages"`
-	DistinctiveTitle    string    `json:"distinctive_title"`
-	DistinctiveSubtitle string    `json:"distinctive_subtitle"`
-	Description         string    `json:"description"`
-	ThemaCode           []string  `json:"thema_code"`
-	Classification      []string  `json:"classification"`
-	Category            []string  `json:"category"`
-	Audience            []string  `json:"audience"`
-	Language            []string  `json:"language"`
-	EditionNo           int64     `json:"edition_no"`
-	City                string    `json:"city"`
-	PubMonth            uint8     `json:"pub_month"`
-	PubYear             uint16    `json:"pub_year"`
-	PubDay              uint8     `json:"pub_day"`
-	LicenseNo           int64     `json:"license_no"`
-	Lcno                int64     `json:"lcno"`
-	GTin13              string    `json:"gtin13"`
-	Prefix              string    `json:"prefix"`
-	Isbn13              string    `json:"isbn13"`
-	ContrID             []string  `json:"contr_id"`
-	ContrName           []string  `json:"contr_name"`
-	ContrIDRole         []string  `json:"contr_id_role"`
-	ContrIDTab          []string  `json:"contr_id_tab"`
-	ContrRole           []string  `json:"contr_role"`
-	ContrDenoms         []string  `json:"contr_denoms"`
-	LastPriceUpdate     time.Time `json:"last_price_update"`
-	Price               float64   `json:"price"`
-	PriceChange         float64   `json:"price_change"`
-	Vat                 float64   `json:"vat"`
-	VatChange           float64   `json:"vat_change"`
-	PriceType           string    `json:"price_type"`
-	PriceValidUntil     time.Time `json:"price_valid_until"`
-	Cover               string    `json:"cover"`
-	CoverBack           string    `json:"cover_back"`
-	Version             int64     `json:"_version_"`
+	ProductID           string          `json:"product_id"`
+	Translated          string          `json:"translated"`
+	PublishingStatus    string          `json:"publishing_status"`
+	LastUpdate          time.Time       `json:"last_update"`
+	ProductStatus       bool            `json:"product_status"`
+	Lcx                 bool            `json:"lcx"`
+	AddProductTs        time.Time       `json:"add_product_ts"`
+	ProductFormID       string          `json:"product_form_id"`
+	ProductForm         string          `json:"product_form"`
+	ProductKind         string          `json:"product_kind"`
+	PubID               string          `json:"pub_id"`
+	PubName             string          `json:"pub_name"`
+	Imprint             string          `json:"imprint"`
+	Pages               int64           `json:"pages"`
+	DistinctiveTitle    string          `json:"distinctive_title"`
+	DistinctiveSubtitle string          `json:"distinctive_subtitle"`
+	Description         string          `json:"description"`
+	ThemaCode           []string        `json:"thema_code"`
+	Classification      []string        `json:"classification"`
+	Category            []string        `json:"category"`
+	Audience            []string        `json:"audience"`
+	Language            []string        `json:"language"`
+	EditionNo           int64           `json:"edition_no"`
+	City                string          `json:"city"`
+	PubMonth            uint8           `json:"pub_month"`
+	PubYear             uint16          `json:"pub_year"`
+	PubDay              uint8           `json:"pub_day"`
+	LicenseNo           int64           `json:"license_no"`
+	Lcno                int64           `json:"lcno"`
+	GTin13              string          `json:"gtin13"`
+	Prefix              string          `json:"prefix"`
+	Isbn13              string          `json:"isbn13"`
+	ContrID             []string        `json:"contr_id"`
+	ContrName           []string        `json:"contr_name"`
+	ContrIDRole         []string        `json:"contr_id_role"`
+	ContrIDTab          []string        `json:"contr_id_tab"`
+	ContrRole           []string        `json:"contr_role"`
+	ContrDenoms         []string        `json:"contr_denoms"`
+	LastPriceUpdate     time.Time       `json:"last_price_update"`
+	Price               decimal.Decimal `json:"price"`
+	PriceChange         decimal.Decimal `json:"price_change"`
+	Vat                 decimal.Decimal `json:"vat"`
+	VatChange           decimal.Decimal `json:"vat_change"`
+	PriceType           string          `json:"price_type"`
+	PriceValidUntil     time.Time       `json:"price_valid_until"`
+	Cover               string          `json:"cover"`
+	CoverBack           string          `json:"cover_back"`
+	Version             int64           `json:"_version_"`
 }
 
 type CompactBook struct {
-	ProductID        string    `json:"product_id"`
-	PublishingStatus string    `json:"publishing_status"`
-	PubID            string    `json:"pub_id"`
-	PubName          string    `json:"pub_name"`
-	Isbn13           string    `json:"isbn13"`
-	DistinctiveTitle string    `json:"distinctive_title"`
-	LastUpdate       time.Time `json:"last_update"`
-	LastPriceUpdate  time.Time `json:"last_price_update"`
-	PriceValidUntil  time.Time `json:"price_valid_until"`
-	Price            float64   `json:"price"`
-	PriceChange      float64   `json:"price_change"`
-	Vat              float64   `json:"vat"`
-	VatChange        float64   `json:"vat_change"`
-	PriceType        string    `json:"price_type"`
+	ProductID        string          `json:"product_id"`
+	PublishingStatus string          `json:"publishing_status"`
+	PubID            string          `json:"pub_id"`
+	PubName          string          `json:"pub_name"`
+	Isbn13           string          `json:"isbn13"`
+	DistinctiveTitle string          `json:"distinctive_title"`
+	LastUpdate       time.Time       `json:"last_update"`
+	LastPriceUpdate  time.Time       `json:"last_price_update"`
+	PriceValidUntil  time.Time       `json:"price_valid_until"`
+	Price            decimal.Decimal `json:"price"`
+	PriceChange      decimal.Decimal `json:"price_change"`
+	Vat              decimal.Decimal `json:"vat"`
+	VatChange        decimal.Decimal `json:"vat_change"`
+	PriceType        string          `json:"price_type"`
 }
 
 func CSVHeader(w io.Writer, compact bool) {
@@ -146,7 +148,7 @@ func CSVHeader(w io.Writer, compact bool) {
 			"pages",
 			"distinctive_title",
 			"distinctive_subtitle",
-			"description",
+			// "description",
 			"thema_code",
 			"classification",
 			"category",
@@ -196,10 +198,10 @@ func (b *Book) CSVRow(w io.Writer, compact bool) {
 			b.LastUpdate.Format(time.RFC1123),
 			b.LastPriceUpdate.Format(time.RFC1123),
 			b.PriceValidUntil.Format(time.RFC1123),
-			strconv.FormatFloat(b.Price, 'f', 2, 64),
-			strconv.FormatFloat(b.PriceChange, 'f', 2, 64),
-			strconv.FormatFloat(b.Vat, 'f', 2, 64),
-			strconv.FormatFloat(b.VatChange, 'f', 2, 64),
+			b.Price.String(),
+			b.PriceChange.String(),
+			b.Vat.String(),
+			b.VatChange.String(),
 			b.PriceType,
 		})
 	} else {
@@ -220,7 +222,7 @@ func (b *Book) CSVRow(w io.Writer, compact bool) {
 			strconv.FormatInt(b.Pages, 10),
 			b.DistinctiveTitle,
 			b.DistinctiveSubtitle,
-			b.Description,
+			// b.Description,
 			strings.Join(b.ThemaCode, " "),
 			strings.Join(b.Classification, " "),
 			strings.Join(b.Category, " "),
@@ -243,10 +245,10 @@ func (b *Book) CSVRow(w io.Writer, compact bool) {
 			strings.Join(b.ContrRole, " "),
 			strings.Join(b.ContrDenoms, " "),
 			b.LastPriceUpdate.Format(time.RFC1123),
-			strconv.FormatFloat(b.Price, 'f', 2, 64),
-			strconv.FormatFloat(b.PriceChange, 'f', 2, 64),
-			strconv.FormatFloat(b.Vat, 'f', 2, 64),
-			strconv.FormatFloat(b.VatChange, 'f', 2, 64),
+			b.Price.String(),
+			b.PriceChange.String(),
+			b.Vat.String(),
+			b.VatChange.String(),
 			b.PriceType,
 			b.PriceValidUntil.Format(time.RFC1123),
 			b.Cover,
