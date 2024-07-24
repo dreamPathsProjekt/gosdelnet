@@ -31,6 +31,7 @@ func main() {
 	rows := flag.Int64("rows", 10, "number of rows to fetch")
 	isbn := flag.String("isbn", "", "specify an ISBN-13 to search for, can use prefix too (e.g. 978-960-451-482 instead of full ISBN-13 978-960-451-482-3)")
 	publisher := flag.String("publisher", "", "specify a publisher to search for")
+	publisherId := flag.String("publisherID", "", "specify a publisher id to search for")
 	csvFile := flag.String("csv", "", "specify an output csv file to write to")
 	price := flag.Bool("price", false, "enable price tracking outputs")
 	verbose := flag.Bool("verbose", false, "enable verbose logging")
@@ -77,6 +78,13 @@ func main() {
 	if *publisher != "" && *isbn == "" {
 		log.Info().Str("publisher", *publisher).Msgf("Searching for publisher: %s", *publisher)
 		query = fmt.Sprintf("imprint_search:(%s)", *publisher)
+	} else {
+		log.Info().Msg("No publisher specified, searching all publishers")
+	}
+
+	if *publisherId != "" && *isbn == "" {
+		log.Info().Str("publisher", *publisher).Msgf("Searching for publisher: %s", *publisher)
+		query = fmt.Sprintf("pub_id:(%s)", *publisherId)
 	} else {
 		log.Info().Msg("No publisher specified, searching all publishers")
 	}
